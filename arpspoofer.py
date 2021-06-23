@@ -7,7 +7,7 @@ def intro(targets):
     "give an introduction"
     print("*"*50)
     print("Tool: ARP spoofer tool.")
-    print("Author: ArimaGH")
+    print("Author: Amir Gholizadeh (AKA arima)")
     print(f"targets: {targets[0]} and {targets[1]}")
     print("enjoy hacking!")
     print("*"*50)
