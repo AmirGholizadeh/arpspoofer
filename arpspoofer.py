@@ -38,11 +38,15 @@ def checkArguments(targetsList):
 
 def getMAC(ip):
     "get the MAC address of a given IP"
-    ARPPacket = scapy.ARP(pdst=ip);
-    etherPacket = scapy.Ether(dst="ff:ff:ff:ff:ff:ff")
-    etherARP = etherPacket/ARPPacket
-    answer = scapy.srp(etherARP, verbose=False, timeout=1)[0]
-    return answer[0][1].hwdst
+    try:
+        ARPPacket = scapy.ARP(pdst=ip);
+        etherPacket = scapy.Ether(dst="ff:ff:ff:ff:ff:ff")
+        etherARP = etherPacket/ARPPacket
+        answer = scapy.srp(etherARP, verbose=False, timeout=1)[0]
+        return answer[0][1].hwdst
+    except IndexError:
+        print(f'[-] IP {ip} is not reachable!')
+        exit(1)
 
 def sendARPResponse(targetIP, sourceIP):
     "send an ARP response, fooling the target"
